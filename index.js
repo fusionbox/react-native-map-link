@@ -135,6 +135,9 @@ export async function showLocation (options) {
   if (!('latitude' in options) || !('longitude' in options)) {
     throw new MapsException('First parameter of `showLocation` should contain object with at least keys `latitude` and `longitude`.')
   }
+  if ('address' in options && options.address && typeof options.address !== 'string') {
+    throw new MapsException('Option `address` should be of type `string`.')
+  }
   if ('title' in options && options.title && typeof options.title !== 'string') {
     throw new MapsException('Option `title` should be of type `string`.')
   }
@@ -144,6 +147,7 @@ export async function showLocation (options) {
 
   let lat = parseFloat(options.latitude)
   let lng = parseFloat(options.longitude)
+  let address = options.address && options.address.length ? options.address : null
   let title = options.title && options.title.length ? options.title : null
   let app = options.app && options.app.length ? options.app : null
 
@@ -155,11 +159,12 @@ export async function showLocation (options) {
   switch (app) {
     case 'apple-maps':
       url = prefixes['apple-maps'] + '?ll=' + lat + ',' + lng +
-        '&q=' + encodeURIComponent(title || 'Location')
+        '&q=' + encodeURIComponent(title || 'Location') +
+        '&address=' + encodeURIComponent(address || '')
       break
     case 'google-maps':
       url = prefixes['google-maps'] + (isIOS
-        ? '?api=1&ll=' + lat + ',' + lng + '&q=' + encodeURIComponent(title || 'Location')
+        ? '?api=1&ll=' + lat + ',' + lng + '&q=' + encodeURIComponent(address || title || 'Location')
         : '?q=' + lat + ',' + lng)
       break
     case 'citymapper':
